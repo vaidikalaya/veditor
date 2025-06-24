@@ -5,7 +5,7 @@ function App() {
   return (
     <>
       <div className='container'>
-        <h1 className='text-2xl text-bold'>Custom WYSIWYG Editor</h1>
+        <h1 className='text-2xl text-bold text-red-900'>Custom WYSIWYG Editor</h1>
         <VEditor />
       </div>
     </>

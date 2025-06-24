@@ -1,12 +1,12 @@
 import React, { useRef,useState,useEffect } from 'react';
 import { Bold, Italic, Underline, Code } from './components/Icons';
+import Toolbar from './components/Toolbar';
 import './editor.css'
 
 export default function VEditor() {
 
     const editorRef = useRef(null);
     const [showCodeView, setShowCodeView] = useState(false);
-    const [showDropdown, setShowDropdown] = useState(false);
     const [html, setHtml] = useState('');
 
     const applyFormat = (tagName) => {
@@ -68,45 +68,7 @@ export default function VEditor() {
         <div className="max-w-2xl mx-auto border rounded-lg shadow-lg pt-2 bg-white mt-8">
 
             {/* Toolbar */}
-            <div className="border-b px-2 py-2 bg-gray-50 rounded-t-lg flex items-center">
-                <div className='toolbar flex space-x-2'>
-                    <button type='button' onClick={() => applyFormat('strong')}><Bold /></button>
-                    <button type='button' onClick={() => applyFormat('em')}><Italic /></button>
-                    <button type='button' onClick={() => applyFormat('u')}><Underline /></button>
-                    <div className="relative inline-block text-left">
-                        <button
-                            type="button"
-                            onClick={() => setShowDropdown(!showDropdown)}
-                            className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-3 py-1 bg-white text-sm font-medium text-gray-700 hover:bg-gray-100"
-                        >
-                            Heading
-                            <svg className="-mr-1 ml-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-                            </svg>
-                        </button>
-
-                        {showDropdown && (
-                            <div className="origin-top-left absolute left-0 mt-2 w-36 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
-                            <div className="py-1">
-                                {['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'].map(tag => (
-                                <button
-                                    key={tag}
-                                    onClick={() => {
-                                    applyFormat(tag);
-                                    setShowDropdown(false);
-                                    }}
-                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                >
-                                    {tag === 'p' ? 'Normal' : tag.toUpperCase()}
-                                </button>
-                                ))}
-                            </div>
-                            </div>
-                        )}
-                    </div>
-                    <button type='button' onClick={handleViewHTML}><Code /></button>
-                </div>
-            </div>
+            <Toolbar applyFormat={applyFormat} handleViewHTML={handleViewHTML} />
 
             {/* Editor Area */}
             {
@@ -115,7 +77,7 @@ export default function VEditor() {
                     ref={editorRef}
                     contentEditable
                     suppressContentEditableWarning={true}
-                    className="min-h-[200px] p-2 bg-gray-50 rounded-b-lg focus:outline-none text-gray-800 text-base"
+                    className="prose min-h-[200px] p-2 bg-gray-50 rounded-b-lg focus:outline-none text-gray-800 text-base"
                     style={{ outline: 'none' }}
                 >
                 </div>
