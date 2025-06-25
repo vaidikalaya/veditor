@@ -26,6 +26,11 @@
   margin-left: 0.5rem;
 }
 
+.toolbar button{
+  background: none;
+  border: none;
+}
+
 .veditor-area{
     min-height: 200px;
     padding: 0.5rem;
