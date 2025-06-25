@@ -65,7 +65,7 @@ export default function VEditor() {
     }
 
     return (<>
-        <div className="max-w-2xl mx-auto border rounded-lg shadow-lg pt-2 bg-white mt-8">
+        <div className="vcontainer">
 
             {/* Toolbar */}
             <Toolbar applyFormat={applyFormat} handleViewHTML={handleViewHTML} />
@@ -77,7 +77,7 @@ export default function VEditor() {
                     ref={editorRef}
                     contentEditable
                     suppressContentEditableWarning={true}
-                    className="prose min-h-[200px] p-2 bg-gray-50 rounded-b-lg focus:outline-none text-gray-800 text-base"
+                    className="prose veditor-area"
                     style={{ outline: 'none' }}
                 >
                 </div>
@@ -85,7 +85,7 @@ export default function VEditor() {
 
             {
                 showCodeView && 
-                <pre className="min-h-[200px] bg-black text-green-400 text-sm p-4 rounded-b-lg overflow-auto">
+                <pre className="log-console">
                     {html}
                 </pre>
             }

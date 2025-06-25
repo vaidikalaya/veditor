@@ -3,8 +3,8 @@ import Dropdown from "./Dropdown"
 
 export default function Toolbar({applyFormat,handleViewHTML}) {
     return (<>
-        <div className="border-b px-2 py-2 bg-gray-50 rounded-t-lg flex items-center">
-            <div className='toolbar flex space-x-2'>
+        <div className="toolbar-container">
+            <div className='toolbar'>
                 <Dropdown
                     label="Heading"
                     onSelect={(tag) => applyFormat(tag)}
