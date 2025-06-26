@@ -1,13 +1,13 @@
 import { Bold, Italic, Underline, Code } from './Icons';
 import Dropdown from "./Dropdown"
 
-export default function Toolbar({applyFormat,handleViewHTML}) {
+export default function Toolbar({handleTypograph,applyFormat,handleViewHTML}) {
     return (<>
         <div className="toolbar-container">
             <div className='toolbar'>
                 <Dropdown
                     label="Heading"
-                    onSelect={(tag) => applyFormat(tag)}
+                    onSelect={(tag) => handleTypograph(tag)}
                     sections={[
                         {
                         title: 'Heading Styles',

@@ -6,14 +6,29 @@ import './editor.css'
 export default function VEditor({onChange,value}) {
 
     const editorRef = useRef(null);
+    const consoleRef = useRef(null);
     const [consoleView, setConsoleView] = useState(false);
     const [html, setHtml] = useState('');
 
     const handleInput = () => {
-        const newHtml = editorRef.current.innerHTML;
-        setHtml(newHtml);
-        onChange?.(newHtml);
+        if (!consoleView && editorRef.current) {
+            const newHtml = editorRef.current.innerHTML;
+            setHtml(newHtml);
+            onChange?.(newHtml);
+        } else if (consoleView && consoleRef.current) {
+            const newHtml = consoleRef.current.innerText;
+            setHtml(newHtml);
+            onChange?.(newHtml);
+        }
     };
+
+    const handleViewHTML = () => {
+        if (editorRef.current) {
+            const rawHTML = editorRef.current.innerHTML;
+            setHtml(rawHTML);
+        }
+        setConsoleView(!consoleView);
+    }
 
     const handleTypograph = (tag) => {
         const selection = window.getSelection();
@@ -59,8 +74,6 @@ export default function VEditor({onChange,value}) {
         // Create new block element
         const newBlock = document.createElement(tag);
         newBlock.innerHTML = node.innerHTML;
-
-        console.log('Replacing block', node, 'with', newBlock);
 
         node.replaceWith(newBlock);
 
@@ -112,25 +125,11 @@ export default function VEditor({onChange,value}) {
         selection.addRange(newRange);
     }
 
-    const escapeHTML = (html) => {
-        return html
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
-    };
-
-    const handleViewHTML = () => {
-        if (editorRef.current) {
-            const rawHTML = editorRef.current.innerHTML;
-            setHtml(rawHTML);
-        }
-        setConsoleView(!consoleView);
-    }
-
     /* This is for console view toggle*/
     useEffect(() => {
+        if (consoleView && consoleRef.current) {
+            consoleRef.current.innerText = html;
+        }
         if (!consoleView && editorRef.current) {
             editorRef.current.innerHTML = html;
             const range = document.createRange();
@@ -148,11 +147,11 @@ export default function VEditor({onChange,value}) {
     useEffect(() => {
         if (editorRef.current && !editorRef.current.innerHTML.trim()) {
             const p = document.createElement('p');
-            p.innerHTML = '\u200B';
+            p.innerHTML = '<br>';
             editorRef.current.appendChild(p);
             const range = document.createRange();
             const sel = window.getSelection();
-            range.setStart(p.firstChild, 1); 
+            range.setStart(p, 0); 
             range.collapse(true);
             sel.removeAllRanges();
             sel.addRange(range);
@@ -164,7 +163,11 @@ export default function VEditor({onChange,value}) {
         <div className="vcontainer">
 
             {/* Toolbar */}
-            <Toolbar applyFormat={applyFormat} handleViewHTML={handleViewHTML} />
+            <Toolbar 
+                handleTypograph={handleTypograph} 
+                applyFormat={applyFormat} 
+                handleViewHTML={handleViewHTML} 
+            />
 
             {/* Editor Area */}
             {
@@ -182,8 +185,14 @@ export default function VEditor({onChange,value}) {
 
             {
                 consoleView && 
-                <pre className="log-console">
-                    {html}
+                <pre 
+                    ref={consoleRef}
+                    contentEditable
+                    suppressContentEditableWarning={true} 
+                    onInput={handleInput}
+                    className="log-console"
+                    style={{ whiteSpace: 'pre-wrap' }}
+                >
                 </pre>
             }
         </div>
