@@ -34,6 +34,7 @@
 .veditor-area{
     min-height: 200px;
     padding: 0.5rem;
+    padding-top: 0px;
     background: #ffffff;
     color: #1f2938;
     border-bottom-right-radius: 0.5rem;
@@ -42,6 +43,8 @@
 
 .log-console {
   min-height: 200px;
+  margin-top: 0px;
+  margin-bottom: 0px;
   background-color: #000000;     /* bg-black */
   color: #34D399;                /* text-green-400 */
   font-size: 0.875rem;           /* text-sm */

@@ -3,11 +3,76 @@ import { Bold, Italic, Underline, Code } from './components/Icons';
 import Toolbar from './components/Toolbar';
 import './editor.css'
 
-export default function VEditor() {
+export default function VEditor({onChange,value}) {
 
     const editorRef = useRef(null);
-    const [showCodeView, setShowCodeView] = useState(false);
+    const [consoleView, setConsoleView] = useState(false);
     const [html, setHtml] = useState('');
+
+    const handleInput = () => {
+        const newHtml = editorRef.current.innerHTML;
+        setHtml(newHtml);
+        onChange?.(newHtml);
+    };
+
+    const handleTypograph = (tag) => {
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
+
+        const range = selection.getRangeAt(0);
+        let node = range.startContainer;
+
+        // Traverse up to find a block-level parent
+        while (node && node !== editorRef.current && node.nodeType === 3) {
+        node = node.parentNode;
+        }
+
+        // Traverse until we find a block-level node
+        while (
+        node &&
+        node !== editorRef.current &&
+        !/^(P|DIV|H[1-6])$/i.test(node.nodeName)
+        ) {
+        node = node.parentNode;
+        }
+
+        // If no suitable block found, wrap selection in new heading
+        if (!node || node === editorRef.current) {
+        const wrapper = document.createElement(tag);
+        const selectedText = selection.toString() || '\u200B';
+        wrapper.textContent = selectedText;
+
+        range.deleteContents();
+        range.insertNode(wrapper);
+
+        // Place cursor after inserted heading
+        const newRange = document.createRange();
+        newRange.setStartAfter(wrapper);
+        newRange.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+
+        handleInput();
+        return;
+        }
+
+        // Create new block element
+        const newBlock = document.createElement(tag);
+        newBlock.innerHTML = node.innerHTML;
+
+        console.log('Replacing block', node, 'with', newBlock);
+
+        node.replaceWith(newBlock);
+
+        // Move cursor to end of new block
+        const newRange = document.createRange();
+        newRange.selectNodeContents(newBlock);
+        newRange.collapse(false);
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+
+        handleInput();
+    };
 
     const applyFormat = (tagName) => {
 
@@ -61,8 +126,39 @@ export default function VEditor() {
             const rawHTML = editorRef.current.innerHTML;
             setHtml(rawHTML);
         }
-        setShowCodeView(!showCodeView);
+        setConsoleView(!consoleView);
     }
+
+    /* This is for console view toggle*/
+    useEffect(() => {
+        if (!consoleView && editorRef.current) {
+            editorRef.current.innerHTML = html;
+            const range = document.createRange();
+            const sel = window.getSelection();
+            if (editorRef.current.lastChild) {
+                range.selectNodeContents(editorRef.current);
+                range.collapse(false);
+                sel.removeAllRanges();
+                sel.addRange(range);
+            }
+        }
+    }, [consoleView]);
+
+    /*This if for inserting default P tag at the first time rendering (without html data)*/
+    useEffect(() => {
+        if (editorRef.current && !editorRef.current.innerHTML.trim()) {
+            const p = document.createElement('p');
+            p.innerHTML = '\u200B';
+            editorRef.current.appendChild(p);
+            const range = document.createRange();
+            const sel = window.getSelection();
+            range.setStart(p.firstChild, 1); 
+            range.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(range);
+            editorRef.current.focus();
+        }
+    }, []);
 
     return (<>
         <div className="vcontainer">
@@ -72,19 +168,20 @@ export default function VEditor() {
 
             {/* Editor Area */}
             {
-                !showCodeView &&
+                !consoleView &&
                 <div
                     ref={editorRef}
                     contentEditable
                     suppressContentEditableWarning={true}
-                    className="prose veditor-area"
+                    onInput={handleInput}
+                    className="veditor-area"
                     style={{ outline: 'none' }}
                 >
                 </div>
             }
 
             {
-                showCodeView && 
+                consoleView && 
                 <pre className="log-console">
                     {html}
                 </pre>
