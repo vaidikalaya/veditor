@@ -145,3 +145,15 @@
 .vspace-x-2 > :not([hidden]) ~ :not([hidden]) {
   margin-left: 0.5rem;
 }
+
+.image-resize-popup button {
+  font-size: 12px;
+  padding: 2px 6px;
+  background: #eee;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.image-resize-popup button:hover {
+  background: #ddd;
+}
