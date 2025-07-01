@@ -59,13 +59,36 @@ export const Bars3 = ({ size = 20, color = "none", className = "" }) => (
     </svg>
 );
 
+export const AlignLeft = ({ size = 20, color = "none", className = "" }) => (
+    <svg fill={color} width={size} height={size} className={className} viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
+    </svg>
+);
+
+export const AlignRight = ({ size = 20, color = "none", className = "" }) => (
+    <svg fill={color} width={size} height={size} className={className} viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M12 17.25h8.25" />
+    </svg>
+);
+
+export const AlignCenter = ({ size = 20, color = "none", className = "" }) => (
+    <svg fill={color} width={size} height={size} className={className} viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12H12m-8.25 5.25h16.5" />
+    </svg>
+);
+
+
+
 const Icons = {
     ListBullet,
     ListNumbered,
     Link,
     Image,
     Table,
-    Bars3
+    Bars3,
+    AlignLeft,
+    AlignRight,
+    AlignCenter
 };
 
 export default Icons;
