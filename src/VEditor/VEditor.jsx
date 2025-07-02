@@ -1,9 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react';
 import axios from 'axios';
 import { Bold, Italic, Underline, Code } from './components/Icons';
-import {
-    handleTypograph, handleFormat, handleAlign, handleColor, toggleList
-} from './editor/editorActions';
+import { handleTypograph, handleFormat, handleAlign, handleColor, toggleList } from './editor/editorActions';
+import { uploadAndInsertImage } from './editor/imageUploader';
 import Toolbar from './components/Toolbar';
 import './editor.css'
 
@@ -185,49 +184,6 @@ export default function VEditor({ onChange, onChangeImage = '', value }) {
         setConsoleView(!consoleView);
     }
 
-    const handleInsertImage = (file) => {
-        console.log(file);
-        uploadAndInsertImage(file);
-    };
-
-    const uploadAndInsertImage = async (file) => {
-
-        const formData = new FormData();
-        formData.append('image', file);
-
-        try {
-            const res = await axios.post('http://localhost:1100/api/save-veditor-image', formData);
-            if (res.data.status == 'success') {
-                insertImageAtCursor(res.data.data.url);
-                handleInput();
-            }
-        } catch (error) {
-            console.error('Upload error:', error);
-        }
-    };
-
-    const insertImageAtCursor = (url) => {
-
-        const img = document.createElement('img');
-        img.src = url;
-        img.alt = 'Inserted image';
-        img.style.maxWidth = '100%';
-
-        const selection = window.getSelection();
-        if (selection.rangeCount > 0) {
-            const range = selection.getRangeAt(0);
-            range.deleteContents();
-            range.insertNode(img);
-
-            range.setStartAfter(img);
-            range.collapse(true);
-            selection.removeAllRanges();
-            selection.addRange(range);
-        } else {
-            editorRef.current?.appendChild(img);
-        }
-    };
-
     const handleImageClick = (e) => {
         if (e.target.tagName === 'IMG') {
             setTargetImage(e.target);
@@ -354,8 +310,8 @@ export default function VEditor({ onChange, onChangeImage = '', value }) {
                 handleAlign={(alignment) => handleAlign(editorRef, handleInput, alignment)}
                 handleColor={(prop, val) => handleColor(editorRef, handleInput, prop, val)}
                 toggleList={(listType) => toggleList(editorRef, handleInput, listType)}
+                handleInsertImage={(file) => uploadAndInsertImage(editorRef, handleInput, file)}
                 handleViewHTML={handleViewHTML}
-                handleInsertImage={handleInsertImage}
                 handleInsertModule={handleInsertModule}
             />
 
