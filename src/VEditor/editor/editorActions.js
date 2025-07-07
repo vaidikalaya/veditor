@@ -329,6 +329,23 @@ export function toggleList(editorRef, handleInput, listType) {
 
 }
 
+export function handleHorizontalLine(editorRef, handleInput) {
+    if (editorRef.current) {
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
+        const range = selection.getRangeAt(0);
+        const hr = document.createElement('hr');
+        range.collapse(false);
+        range.insertNode(hr);
+        // Move cursor after the horizontal rule
+        range.setStartAfter(hr);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        handleInput();
+    }
+};
+
 const flattenSpan = (span, styleProp, value) => {
     const innerSpans = span.querySelectorAll('span');
     innerSpans.forEach(inner => {
@@ -348,4 +365,85 @@ const closestList = (editorRef, node) => {
         node = node.parentNode;
     }
     return null;
+};
+
+export function handleInsertTable(editorRef, handleInput, rows, cols) {
+    if (!editorRef.current) return;
+    editorRef.current.focus();
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+    let range = selection.getRangeAt(0);
+
+    // If the editor is empty, insert a paragraph first
+    if (editorRef.current.innerHTML.trim() === '' || editorRef.current.innerHTML === '<p>\u200B</p>') {
+        editorRef.current.innerHTML = '';
+        const p = document.createElement('p');
+        p.appendChild(document.createTextNode('\u200B'));
+        editorRef.current.appendChild(p);
+        range = document.createRange();
+        range.setStart(p, 0);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
+
+    // Remove selection content if any (for correct placement)
+    if (!range.collapsed) {
+        range.deleteContents();
+    }
+
+    // If inside a text node, split it and move range after split
+    if (range.startContainer.nodeType === 3) {
+        const textNode = range.startContainer;
+        const offset = range.startOffset;
+        let afterNode = textNode;
+        if (offset < textNode.length) {
+            afterNode = textNode.splitText(offset);
+        }
+        // Move range after the split text node
+        range = document.createRange();
+        range.setStartAfter(afterNode);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
+
+    // Create table
+    const table = document.createElement('table');
+    table.className = 'etable';
+    for (let i = 0; i < rows; i++) {
+        const tr = document.createElement('tr');
+        for (let j = 0; j < cols; j++) {
+            const td = document.createElement('td');
+            td.innerHTML = '&nbsp;';
+            tr.appendChild(td);
+        }
+        table.appendChild(tr);
+    }
+
+    // Insert table at the current cursor position
+    range.insertNode(table);
+
+    // Insert a paragraph after the table for easier editing
+    const afterP = document.createElement('p');
+    afterP.appendChild(document.createTextNode('\u200B'));
+    if (table.nextSibling) {
+        table.parentNode.insertBefore(afterP, table.nextSibling);
+    } else {
+        table.parentNode.appendChild(afterP);
+    }
+
+    // Move cursor to first cell
+    setTimeout(() => {
+        const firstCell = table.querySelector('td');
+        if (firstCell) {
+            const newRange = document.createRange();
+            newRange.selectNodeContents(firstCell);
+            newRange.collapse(true);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(newRange);
+        }
+        handleInput();
+    }, 0);
 };

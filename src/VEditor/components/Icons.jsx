@@ -77,6 +77,12 @@ export const AlignCenter = ({ size = 20, color = "none", className = "" }) => (
     </svg>
 );
 
+export const Minus = ({ size = 20, color = "none", className = "" }) => (
+    <svg fill={color} width={size} height={size} className={className} viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
+    </svg>
+);
+
 
 
 const Icons = {
@@ -88,7 +94,8 @@ const Icons = {
     Bars3,
     AlignLeft,
     AlignRight,
-    AlignCenter
+    AlignCenter,
+    Minus
 };
 
 export default Icons;

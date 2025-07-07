@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Bold, Italic, Underline, Code, ListBullet, ListNumbered, Image, AlignLeft, AlignCenter, AlignRight, Bars3 } from './Icons';
+import { Bold, Italic, Underline, Code, ListBullet, ListNumbered, Image, AlignLeft, AlignCenter, AlignRight, Bars3, Minus } from './Icons';
 import Dropdown from "./Dropdown"
+import TableGridSelector from "./TableGridSelector";
 
 export default function Toolbar({
     handleTypograph,
@@ -8,9 +9,11 @@ export default function Toolbar({
     handleViewHTML,
     toggleList,
     handleInsertImage,
-    handleInsertModule,
+    handleAlertBox,
     handleAlign,
-    handleColor
+    handleColor,
+    handleHorizontalLine,
+    handleInsertTable
 }) {
 
     const fileInputRef = React.useRef(null);
@@ -48,11 +51,18 @@ export default function Toolbar({
                         },
                     ]}
                 />
-                <button type='button' onClick={() => handleFormat('strong')}><Bold /></button>
-                <button type='button' onClick={() => handleFormat('em')}><Italic /></button>
-                <button type='button' onClick={() => handleFormat('u')}><Underline /></button>
-                <button type='button' onClick={() => toggleList('ul')}><ListBullet /></button>
-                <button type='button' onClick={() => toggleList('ol')}><ListNumbered /></button>
+                <button type='button' onClick={() => handleFormat('strong')}><Bold className="h-24" /></button>
+                <button type='button' onClick={() => handleFormat('em')}><Italic className="h-24" /></button>
+                <button type='button' onClick={() => handleFormat('u')}><Underline className="h-24" /></button>
+                <button type='button' onClick={() => toggleList('ul')}><ListBullet className="h-24" /></button>
+                <button type='button' onClick={() => toggleList('ol')}><ListNumbered className="h-24" /></button>
+                <TableGridSelector
+                    maxRows={10}
+                    maxCols={10}
+                    onSelect={(rows, cols) => handleInsertTable(rows, cols)}
+                />
+                <button type='button' onClick={handleHorizontalLine}><Minus className="h-24" /></button>
+                <button type='button' onClick={triggerFileInput}><Image className="h-24" /></button>
                 <Dropdown
                     label="Align"
                     onSelect={(alignment) => handleAlign(alignment)}
@@ -68,9 +78,9 @@ export default function Toolbar({
                         },
                     ]}
                 />
-                <div className="color-pickers" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <span style={{ fontSize: '12px' }}>Text</span>
+                <div className="color-pickers">
+                    <label>
+                        <span>Text</span>
                         <input
                             type="color"
                             onChange={(e) => handleColor('color', e.target.value)}
@@ -78,8 +88,8 @@ export default function Toolbar({
                         />
                     </label>
 
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <span style={{ fontSize: '12px' }}>BG</span>
+                    <label>
+                        <span>BG</span>
                         <input
                             type="color"
                             onChange={(e) => handleColor('backgroundColor', e.target.value)}
@@ -87,22 +97,25 @@ export default function Toolbar({
                         />
                     </label>
                 </div>
-                <button type='button' onClick={triggerFileInput}><Image /></button>
                 <Dropdown
-                    label="Modules"
-                    onSelect={(moduleType) => handleInsertModule(moduleType)}
+                    label="Alerts"
+                    onSelect={(moduleType) => handleAlertBox(moduleType)}
                     sections={[
                         {
                             title: 'Custom Modules',
                             items: [
-                                { label: 'Info Box', value: 'infoBox' },
-                                { label: 'Warning Box', value: 'warningBox' },
-                                { label: 'Success Box', value: 'successBox' },
+                                { label: 'Info', value: 'alert-info' },
+                                { label: 'Warning', value: 'alert-warning' },
+                                { label: 'Success', value: 'alert-success' },
+                                { label: 'Blue', value: 'alert-blue' },
+                                { label: 'Pink', value: 'alert-pink' },
+                                { label: 'Orange', value: 'alert-orange' },
+                                { label: 'Green', value: 'alert-green' },
                             ],
                         },
                     ]}
                 />
-                <button type='button' onClick={handleViewHTML}><Code /></button>
+                <button type='button' onClick={handleViewHTML}><Code className="h-24" /></button>
 
                 <input
                     type="file"

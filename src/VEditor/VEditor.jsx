@@ -1,8 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react';
-import axios from 'axios';
 import { Bold, Italic, Underline, Code } from './components/Icons';
-import { handleTypograph, handleFormat, handleAlign, handleColor, toggleList } from './editor/editorActions';
+import { handleTypograph, handleFormat, handleAlign, handleColor, toggleList, handleHorizontalLine, handleInsertTable } from './editor/editorActions';
 import { uploadAndInsertImage } from './editor/imageUploader';
+import { handleAlertBox } from './editor/modules';
 import Toolbar from './components/Toolbar';
 import './editor.css'
 
@@ -203,63 +203,6 @@ export default function VEditor({ onChange, onChangeImage = '', value }) {
         setTargetImage(null);
     };
 
-    const handleInsertModule = (moduleType) => {
-        let div = document.createElement('div');
-        div.style.padding = '10px';
-        div.style.margin = '10px 0';
-        div.style.borderRadius = '4px';
-
-        switch (moduleType) {
-            case 'infoBox':
-                div.style.background = '#e7f3fe';
-                div.style.border = '1px solid #b3d7ff';
-                div.textContent = 'Info Box';
-                break;
-            case 'warningBox':
-                div.style.background = '#fff3cd';
-                div.style.border = '1px solid #ffeeba';
-                div.textContent = 'Warning Box';
-                break;
-            case 'successBox':
-                div.style.background = '#d4edda';
-                div.style.border = '1px solid #c3e6cb';
-                div.textContent = 'Success Box';
-                break;
-            default:
-                div.textContent = 'Custom Box';
-        }
-
-        const selection = window.getSelection();
-        if (!selection.rangeCount) return;
-        const range = selection.getRangeAt(0);
-
-        let container = range.startContainer;
-        while (container && container !== editorRef.current && container.nodeType === Node.TEXT_NODE) {
-            container = container.parentNode;
-        }
-
-        if (container && /^(P|DIV|H[1-6])$/i.test(container.nodeName)) {
-            // Insert after the block element
-            if (container.nextSibling) {
-                container.parentNode.insertBefore(div, container.nextSibling);
-            } else {
-                container.parentNode.appendChild(div);
-            }
-        } else {
-            // If no block found, just insert at cursor position
-            range.collapse(false);
-            range.insertNode(div);
-        }
-
-        const newRange = document.createRange();
-        newRange.setStartAfter(div);
-        newRange.collapse(true);
-        selection.removeAllRanges();
-        selection.addRange(newRange);
-
-        handleInput();
-    };
-
     /* This is for console view toggle*/
     useEffect(() => {
         if (consoleView && consoleRef.current) {
@@ -300,6 +243,21 @@ export default function VEditor({ onChange, onChangeImage = '', value }) {
         }
     }, []);
 
+    useEffect(() => {
+        if (editorRef.current && value !== html) {
+            editorRef.current.innerHTML = value;
+            setHtml(value);
+            const range = document.createRange();
+            const sel = window.getSelection();
+            if (editorRef.current.lastChild) {
+                range.selectNodeContents(editorRef.current);
+                range.collapse(false);
+                sel.removeAllRanges();
+                sel.addRange(range);
+            }
+        }
+    }, [value]);
+
     return (<>
         <div className="vcontainer">
 
@@ -311,8 +269,10 @@ export default function VEditor({ onChange, onChangeImage = '', value }) {
                 handleColor={(prop, val) => handleColor(editorRef, handleInput, prop, val)}
                 toggleList={(listType) => toggleList(editorRef, handleInput, listType)}
                 handleInsertImage={(file) => uploadAndInsertImage(editorRef, handleInput, file)}
+                handleAlertBox={(file) => handleAlertBox(editorRef, handleInput, file)}
                 handleViewHTML={handleViewHTML}
-                handleInsertModule={handleInsertModule}
+                handleHorizontal={() => handleHorizontalLine(editorRef, handleInput)}
+                handleInsertTable={(rows, cols) => handleInsertTable(editorRef, handleInput, rows, cols)}
             />
 
             {/* Editor Area */}
