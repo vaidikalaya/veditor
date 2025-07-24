@@ -84,7 +84,7 @@
 }
 
 .veditor-area {
-    min-height: 200px;
+    min-height: 400px;
     max-height: 400px;
     overflow: scroll;
     padding: 0.5rem;

@@ -2,6 +2,8 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Bold, Italic, Underline, Code } from './components/Icons';
 import CodeMirror from '@uiw/react-codemirror';
 import { dracula } from '@uiw/codemirror-theme-dracula';
+import prettier from 'prettier/standalone';
+import parserHtml from 'prettier/parser-html';
 import { handleTypograph, handleFormat, handleAlign, handleColor, toggleList, handleHorizontalLine, handleInsertTable } from './editor/editorActions';
 import { uploadAndInsertImage } from './editor/imageUploader';
 import { handleAlertBox } from './editor/modules';
@@ -48,6 +50,12 @@ export default function VEditor({ onChange, onChangeImage = '', value }) {
     const [consoleView, setConsoleView] = useState(false);
     const [html, setHtml] = useState('');
     const [targetImage, setTargetImage] = useState(null);
+    const [prettyHtml, setPrettyHtml] = useState('');
+
+    // const prettyHtml = prettier.format(html, {
+    //     parser: 'html',
+    //     plugins: [parserHtml]
+    // });
 
     const handleInput = () => {
         if (!consoleView && editorRef.current) {
@@ -208,7 +216,13 @@ export default function VEditor({ onChange, onChangeImage = '', value }) {
     /* This is for console view toggle*/
     useEffect(() => {
         if (consoleView && consoleRef.current) {
-            consoleRef.current.innerText = html;
+            // consoleRef.current.innerText = html;
+            setPrettyHtml(
+                prettier.format(html, {
+                    parser: 'html',
+                    plugins: [parserHtml]
+                })
+            );
         }
         if (!consoleView && editorRef.current) {
             editorRef.current.innerHTML = html;
@@ -221,7 +235,7 @@ export default function VEditor({ onChange, onChangeImage = '', value }) {
                 sel.addRange(range);
             }
         }
-    }, [consoleView]);
+    }, [consoleView,html]);
 
     /*This if for inserting default P tag at the first time rendering (without html data)*/
     useEffect(() => {
@@ -278,7 +292,7 @@ export default function VEditor({ onChange, onChangeImage = '', value }) {
             />
 
             {/* Editor Area */}
-            {/* {
+            {
                 !consoleView &&
                 <div
                     ref={editorRef}
@@ -291,15 +305,15 @@ export default function VEditor({ onChange, onChangeImage = '', value }) {
                     style={{ outline: 'none' }}
                 >
                 </div>
-            } */}
+            } 
 
             {
                 consoleView &&
                 <CodeMirror
-                    value={html}
-                    height="200px"
+                    value={prettyHtml}
+                    height="400px"
                     theme={dracula}
-                    extensions={[]} // You can add language support here, e.g. [html()]
+                    extensions={[]}
                     onChange={(value) => {
                         setHtml(value);
                         onChange?.(value);
@@ -311,7 +325,7 @@ export default function VEditor({ onChange, onChangeImage = '', value }) {
                 />
             }
 
-            {
+            {/* {
                 consoleView &&
                 <pre
                     ref={consoleRef}
@@ -322,7 +336,7 @@ export default function VEditor({ onChange, onChangeImage = '', value }) {
                     style={{ whiteSpace: 'pre-wrap' }}
                 >
                 </pre>
-            }
+            } */}
 
             <ImageResizePopup
                 targetImage={targetImage}

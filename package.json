@@ -10,8 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@uiw/codemirror-theme-dracula": "^4.24.1",
     "@uiw/react-codemirror": "^4.24.1",
     "axios": "^1.10.0",
+    "prettier": "^3.6.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
