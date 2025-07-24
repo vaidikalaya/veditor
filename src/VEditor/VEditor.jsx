@@ -1,5 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Bold, Italic, Underline, Code } from './components/Icons';
+import CodeMirror from '@uiw/react-codemirror';
+import { dracula } from '@uiw/codemirror-theme-dracula';
 import { handleTypograph, handleFormat, handleAlign, handleColor, toggleList, handleHorizontalLine, handleInsertTable } from './editor/editorActions';
 import { uploadAndInsertImage } from './editor/imageUploader';
 import { handleAlertBox } from './editor/modules';
@@ -276,7 +278,7 @@ export default function VEditor({ onChange, onChangeImage = '', value }) {
             />
 
             {/* Editor Area */}
-            {
+            {/* {
                 !consoleView &&
                 <div
                     ref={editorRef}
@@ -289,6 +291,24 @@ export default function VEditor({ onChange, onChangeImage = '', value }) {
                     style={{ outline: 'none' }}
                 >
                 </div>
+            } */}
+
+            {
+                consoleView &&
+                <CodeMirror
+                    value={html}
+                    height="200px"
+                    theme={dracula}
+                    extensions={[]} // You can add language support here, e.g. [html()]
+                    onChange={(value) => {
+                        setHtml(value);
+                        onChange?.(value);
+                    }}
+                    basicSetup={{
+                        lineNumbers: true,
+                        highlightActiveLine: true,
+                    }}
+                />
             }
 
             {
