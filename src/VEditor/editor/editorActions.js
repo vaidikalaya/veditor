@@ -330,21 +330,90 @@ export function toggleList(editorRef, handleInput, listType) {
 }
 
 export function handleHorizontalLine(editorRef, handleInput) {
-    if (editorRef.current) {
-        const selection = window.getSelection();
-        if (!selection.rangeCount) return;
-        const range = selection.getRangeAt(0);
-        const hr = document.createElement('hr');
-        range.collapse(false);
-        range.insertNode(hr);
-        // Move cursor after the horizontal rule
-        range.setStartAfter(hr);
-        range.collapse(true);
-        selection.removeAllRanges();
-        selection.addRange(range);
-        handleInput();
+    if (!editorRef.current) return;
+
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    editorRef.current.focus();
+    range.collapse(false);
+
+    // Walk up to block-level element (e.g. <p>)
+    let container = range.startContainer;
+    while (container && container !== editorRef.current && container.nodeType !== Node.ELEMENT_NODE) {
+        container = container.parentNode;
     }
-};
+
+    // If we're inside a <p>, insert after it
+    const block = container.closest?.('p, div') || container;
+    const hr = document.createElement('hr');
+    const newP = document.createElement('p');
+    newP.innerHTML = '\u200B'; // empty paragraph for cursor
+
+    if (block && block !== editorRef.current) {
+        const parent = block.parentNode;
+
+        if (block.nextSibling) {
+            parent.insertBefore(hr, block.nextSibling);
+            parent.insertBefore(newP, hr.nextSibling);
+        } else {
+            parent.appendChild(hr);
+            parent.appendChild(newP);
+        }
+    } else {
+        // Fallback if not in a block
+        editorRef.current.appendChild(hr);
+        editorRef.current.appendChild(newP);
+    }
+
+    // Move cursor to the empty paragraph
+    const newRange = document.createRange();
+    newRange.setStart(newP, 0);
+    newRange.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(newRange);
+
+    handleInput();
+}
+
+export function handleInsertLink(editorRef, handleInput) {
+
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    let selectedText = range.toString().trim();
+
+    const isLikelyURL = selectedText.startsWith('http://') || selectedText.startsWith('https://');
+    const defaultURL = isLikelyURL ? selectedText : 'https://';
+
+    const url = prompt('Enter the URL:', defaultURL);
+    if (!url) return;
+
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.target = "_blank";
+    anchor.rel = "noopener noreferrer";
+
+    if (selectedText) {
+        anchor.textContent = selectedText;
+        range.deleteContents();
+    } else {
+        anchor.textContent = url;
+    }
+
+    range.insertNode(anchor);
+
+    // Move cursor after the anchor
+    const newRange = document.createRange();
+    newRange.setStartAfter(anchor);
+    newRange.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(newRange);
+
+    handleInput();
+}
 
 const flattenSpan = (span, styleProp, value) => {
     const innerSpans = span.querySelectorAll('span');
@@ -365,85 +434,4 @@ const closestList = (editorRef, node) => {
         node = node.parentNode;
     }
     return null;
-};
-
-export function handleInsertTable(editorRef, handleInput, rows, cols) {
-    if (!editorRef.current) return;
-    editorRef.current.focus();
-    const selection = window.getSelection();
-    if (!selection.rangeCount) return;
-    let range = selection.getRangeAt(0);
-
-    // If the editor is empty, insert a paragraph first
-    if (editorRef.current.innerHTML.trim() === '' || editorRef.current.innerHTML === '<p>\u200B</p>') {
-        editorRef.current.innerHTML = '';
-        const p = document.createElement('p');
-        p.appendChild(document.createTextNode('\u200B'));
-        editorRef.current.appendChild(p);
-        range = document.createRange();
-        range.setStart(p, 0);
-        range.collapse(true);
-        selection.removeAllRanges();
-        selection.addRange(range);
-    }
-
-    // Remove selection content if any (for correct placement)
-    if (!range.collapsed) {
-        range.deleteContents();
-    }
-
-    // If inside a text node, split it and move range after split
-    if (range.startContainer.nodeType === 3) {
-        const textNode = range.startContainer;
-        const offset = range.startOffset;
-        let afterNode = textNode;
-        if (offset < textNode.length) {
-            afterNode = textNode.splitText(offset);
-        }
-        // Move range after the split text node
-        range = document.createRange();
-        range.setStartAfter(afterNode);
-        range.collapse(true);
-        selection.removeAllRanges();
-        selection.addRange(range);
-    }
-
-    // Create table
-    const table = document.createElement('table');
-    table.className = 'etable';
-    for (let i = 0; i < rows; i++) {
-        const tr = document.createElement('tr');
-        for (let j = 0; j < cols; j++) {
-            const td = document.createElement('td');
-            td.innerHTML = '&nbsp;';
-            tr.appendChild(td);
-        }
-        table.appendChild(tr);
-    }
-
-    // Insert table at the current cursor position
-    range.insertNode(table);
-
-    // Insert a paragraph after the table for easier editing
-    const afterP = document.createElement('p');
-    afterP.appendChild(document.createTextNode('\u200B'));
-    if (table.nextSibling) {
-        table.parentNode.insertBefore(afterP, table.nextSibling);
-    } else {
-        table.parentNode.appendChild(afterP);
-    }
-
-    // Move cursor to first cell
-    setTimeout(() => {
-        const firstCell = table.querySelector('td');
-        if (firstCell) {
-            const newRange = document.createRange();
-            newRange.selectNodeContents(firstCell);
-            newRange.collapse(true);
-            const sel = window.getSelection();
-            sel.removeAllRanges();
-            sel.addRange(newRange);
-        }
-        handleInput();
-    }, 0);
 };

@@ -191,6 +191,20 @@
     background: #ddd;
 }
 
+.table-popup-menu button {
+    display: block;
+    background: #f7f7f7;
+    border: none;
+    padding: 4px 8px;
+    margin: 2px 0;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.table-popup-menu button:hover {
+    background: #e0e0e0;
+}
+
 .color-pickers input {
     height: 22px;
     width: 22px;

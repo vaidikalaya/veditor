@@ -1,14 +1,15 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Bold, Italic, Underline, Code } from './components/Icons';
-import CodeMirror from '@uiw/react-codemirror';
-import { dracula } from '@uiw/codemirror-theme-dracula';
-import prettier from 'prettier/standalone';
-import parserHtml from 'prettier/parser-html';
-import { handleTypograph, handleFormat, handleAlign, handleColor, toggleList, handleHorizontalLine, handleInsertTable } from './editor/editorActions';
+import { handleTypograph, handleFormat, handleAlign, handleColor, toggleList, handleHorizontalLine, handleInsertLink } from './editor/editorActions';
+import { handleInsertTable, insertRow, deleteRow, insertColumn, deleteColumn, deleteEntireTable } from './editor/tableActions';
 import { uploadAndInsertImage } from './editor/imageUploader';
 import { handleAlertBox } from './editor/modules';
 import Toolbar from './components/Toolbar';
+import TableMenu from './components/TableMenu';
 import './editor.css'
+
+import CodeMirror from '@uiw/react-codemirror';
+import * as htmlLang from '@codemirror/lang-html';
+import { dracula } from '@uiw/codemirror-theme-dracula';
 
 function ImageResizePopup({ targetImage, onResize, onClose }) {
     if (!targetImage) return null;
@@ -43,6 +44,15 @@ function ImageResizePopup({ targetImage, onResize, onClose }) {
     );
 }
 
+function indentHtml(html) {
+    return html
+        .replace(/></g, '>\n<')               // break tags into new lines
+        .replace(/(<[^\/][^>]*>)/g, '\n$1')   // indent opening tags
+        .replace(/(<\/[^>]+>)/g, '$1\n')      // indent closing tags
+        .replace(/\n+/g, '\n')                // remove extra blank lines
+        .trim();
+}
+
 export default function VEditor({ onChange, onChangeImage = '', value }) {
 
     const editorRef = useRef(null);
@@ -50,12 +60,8 @@ export default function VEditor({ onChange, onChangeImage = '', value }) {
     const [consoleView, setConsoleView] = useState(false);
     const [html, setHtml] = useState('');
     const [targetImage, setTargetImage] = useState(null);
-    const [prettyHtml, setPrettyHtml] = useState('');
-
-    // const prettyHtml = prettier.format(html, {
-    //     parser: 'html',
-    //     plugins: [parserHtml]
-    // });
+    const [selectedCell, setSelectedCell] = useState(null);
+    const [tableMenuPosition, setTableMenuPosition] = useState(null);
 
     const handleInput = () => {
         if (!consoleView && editorRef.current) {
@@ -194,11 +200,26 @@ export default function VEditor({ onChange, onChangeImage = '', value }) {
         setConsoleView(!consoleView);
     }
 
-    const handleImageClick = (e) => {
+    const handleEditorClick = (e) => {
+
+        // Image click logic
         if (e.target.tagName === 'IMG') {
             setTargetImage(e.target);
         } else {
             setTargetImage(null);
+        }
+
+        // Table cell click logic
+        if (e.target.tagName === 'TD') {
+            const rect = e.target.getBoundingClientRect();
+            setSelectedCell(e.target);
+            setTableMenuPosition({
+                top: rect.bottom + window.scrollY,
+                left: rect.left + window.scrollX
+            });
+        } else {
+            setSelectedCell(null);
+            setTableMenuPosition(null);
         }
     };
 
@@ -216,13 +237,7 @@ export default function VEditor({ onChange, onChangeImage = '', value }) {
     /* This is for console view toggle*/
     useEffect(() => {
         if (consoleView && consoleRef.current) {
-            // consoleRef.current.innerText = html;
-            setPrettyHtml(
-                prettier.format(html, {
-                    parser: 'html',
-                    plugins: [parserHtml]
-                })
-            );
+            consoleRef.current.innerText = html;
         }
         if (!consoleView && editorRef.current) {
             editorRef.current.innerHTML = html;
@@ -235,7 +250,7 @@ export default function VEditor({ onChange, onChangeImage = '', value }) {
                 sel.addRange(range);
             }
         }
-    }, [consoleView,html]);
+    }, [consoleView]);
 
     /*This if for inserting default P tag at the first time rendering (without html data)*/
     useEffect(() => {
@@ -284,11 +299,12 @@ export default function VEditor({ onChange, onChangeImage = '', value }) {
                 handleAlign={(alignment) => handleAlign(editorRef, handleInput, alignment)}
                 handleColor={(prop, val) => handleColor(editorRef, handleInput, prop, val)}
                 toggleList={(listType) => toggleList(editorRef, handleInput, listType)}
+                handleInsertLink={(e) => handleInsertLink(editorRef, handleInput)}
                 handleInsertImage={(file) => uploadAndInsertImage(editorRef, handleInput, file)}
                 handleAlertBox={(file) => handleAlertBox(editorRef, handleInput, file)}
-                handleViewHTML={handleViewHTML}
-                handleHorizontal={() => handleHorizontalLine(editorRef, handleInput)}
+                handleHorizontalLine={() => handleHorizontalLine(editorRef, handleInput)}
                 handleInsertTable={(rows, cols) => handleInsertTable(editorRef, handleInput, rows, cols)}
+                handleViewHTML={handleViewHTML}
             />
 
             {/* Editor Area */}
@@ -300,29 +316,24 @@ export default function VEditor({ onChange, onChangeImage = '', value }) {
                     suppressContentEditableWarning={true}
                     onInput={handleInput}
                     onKeyDown={handleKeyDown}
-                    onClick={handleImageClick}
+                    onClick={handleEditorClick}
                     className="veditor-area"
                     style={{ outline: 'none' }}
                 >
                 </div>
-            } 
+            }
 
             {
                 consoleView &&
-                <CodeMirror
-                    value={prettyHtml}
-                    height="400px"
-                    theme={dracula}
-                    extensions={[]}
-                    onChange={(value) => {
-                        setHtml(value);
-                        onChange?.(value);
-                    }}
-                    basicSetup={{
-                        lineNumbers: true,
-                        highlightActiveLine: true,
-                    }}
-                />
+                <div className="log-console" style={{ whiteSpace: 'pre-wrap' }}>
+                    <CodeMirror
+                        value={indentHtml(html)}
+                        height="300px"
+                        extensions={[htmlLang.html()]}
+                        theme={dracula}
+                        onChange={(value) => setHtml(value)}
+                    />
+                </div>
             }
 
             {/* {
@@ -343,6 +354,25 @@ export default function VEditor({ onChange, onChangeImage = '', value }) {
                 onResize={handleResize}
                 onClose={handleCloseResizePopup}
             />
+
+            <TableMenu
+                position={tableMenuPosition}
+                cell={selectedCell}
+                onInsertRow={(cell, above) => insertRow(cell, above, handleInput)}
+                onInsertColumn={(cell, left) => insertColumn(cell, left, handleInput)}
+                onDeleteRow={(cell) => deleteRow(cell, handleInput)}
+                onDeleteColumn={(cell) => deleteColumn(cell, handleInput)}
+                onDeleteTable={(cell) => {
+                    deleteEntireTable(cell, handleInput)
+                    setSelectedCell(null);
+                    setTableMenuPosition(null);
+                }}
+                onClose={() => {
+                    setSelectedCell(null);
+                    setTableMenuPosition(null);
+                }}
+            />
+
         </div>
     </>)
 }

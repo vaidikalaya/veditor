@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Bold, Italic, Underline, Code, ListBullet, ListNumbered, Image, AlignLeft, AlignCenter, AlignRight, Bars3, Minus } from './Icons';
+import { Bold, Italic, Underline, Code, ListBullet, ListNumbered, Image, AlignLeft, AlignCenter, AlignRight, Bars3, Minus, Link } from './Icons';
 import Dropdown from "./Dropdown"
 import TableGridSelector from "./TableGridSelector";
 
@@ -13,7 +13,8 @@ export default function Toolbar({
     handleAlign,
     handleColor,
     handleHorizontalLine,
-    handleInsertTable
+    handleInsertTable,
+    handleInsertLink
 }) {
 
     const fileInputRef = React.useRef(null);
@@ -56,6 +57,7 @@ export default function Toolbar({
                 <button type='button' onClick={() => handleFormat('u')}><Underline className="h-24" /></button>
                 <button type='button' onClick={() => toggleList('ul')}><ListBullet className="h-24" /></button>
                 <button type='button' onClick={() => toggleList('ol')}><ListNumbered className="h-24" /></button>
+                <button type='button' onClick={() => handleInsertLink()}><Link className="h-24" /></button>
                 <TableGridSelector
                     maxRows={10}
                     maxCols={10}
