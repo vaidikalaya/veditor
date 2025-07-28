@@ -16,7 +16,7 @@ export default function TableGridSelector({ maxRows = 10, maxCols = 10, onSelect
 
     return (
         <div style={{ position: 'relative', display: 'inline-block' }}>
-            <button type="button" onClick={() => setOpen((v) => !v)}><Table className='h-24' /></button>
+            <button type="button" onClick={() => setOpen((v) => !v)}><Table className='vh-24' /></button>
             {open && (
                 <div
                     className="table-grid-selector"

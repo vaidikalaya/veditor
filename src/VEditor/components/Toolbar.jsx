@@ -52,19 +52,19 @@ export default function Toolbar({
                         },
                     ]}
                 />
-                <button type='button' onClick={() => handleFormat('strong')}><Bold className="h-24" /></button>
-                <button type='button' onClick={() => handleFormat('em')}><Italic className="h-24" /></button>
-                <button type='button' onClick={() => handleFormat('u')}><Underline className="h-24" /></button>
-                <button type='button' onClick={() => toggleList('ul')}><ListBullet className="h-24" /></button>
-                <button type='button' onClick={() => toggleList('ol')}><ListNumbered className="h-24" /></button>
-                <button type='button' onClick={() => handleInsertLink()}><Link className="h-24" /></button>
+                <button type='button' onClick={() => handleFormat('strong')}><Bold className="vh-24" /></button>
+                <button type='button' onClick={() => handleFormat('em')}><Italic className="vh-24" /></button>
+                <button type='button' onClick={() => handleFormat('u')}><Underline className="vh-24" /></button>
+                <button type='button' onClick={() => toggleList('ul')}><ListBullet className="vh-24" /></button>
+                <button type='button' onClick={() => toggleList('ol')}><ListNumbered className="vh-24" /></button>
+                <button type='button' onClick={() => handleInsertLink()}><Link className="vh-24" /></button>
                 <TableGridSelector
                     maxRows={10}
                     maxCols={10}
                     onSelect={(rows, cols) => handleInsertTable(rows, cols)}
                 />
-                <button type='button' onClick={handleHorizontalLine}><Minus className="h-24" /></button>
-                <button type='button' onClick={triggerFileInput}><Image className="h-24" /></button>
+                <button type='button' onClick={handleHorizontalLine}><Minus className="vh-24" /></button>
+                <button type='button' onClick={triggerFileInput}><Image className="vh-24" /></button>
                 <Dropdown
                     label="Align"
                     onSelect={(alignment) => handleAlign(alignment)}
@@ -117,7 +117,7 @@ export default function Toolbar({
                         },
                     ]}
                 />
-                <button type='button' onClick={handleViewHTML}><Code className="h-24" /></button>
+                <button type='button' onClick={handleViewHTML}><Code className="vh-24" /></button>
 
                 <input
                     type="file"
