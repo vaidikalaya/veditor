@@ -15,7 +15,16 @@ function App() {
     <div className="app-container">
       <div className="editor-card">
         <h1 className="editor-title">Custom WYSIWYG Editor</h1>
-        <VEditor onChange={setHtml} value={html} />
+        <VEditor 
+          onChange={setHtml} 
+          value={html} 
+          imageHandler={{
+            onImageChange:'',
+            source:`service`,
+            prefix:`service`,
+            uploadPath:`services`,
+          }}
+        />
         <div style={{ textAlign: 'center' }}>
           <button onClick={handleConsoleOutput} className="console-btn">Console Data</button>
         </div>

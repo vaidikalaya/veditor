@@ -53,7 +53,7 @@ function indentHtml(html) {
         .trim();
 }
 
-export default function VEditor({ onChange, onChangeImage = '', value }) {
+export default function VEditor({ onChange, value, imageHandler }) {
 
     const editorRef = useRef(null);
     const consoleRef = useRef(null);
@@ -290,7 +290,7 @@ export default function VEditor({ onChange, onChangeImage = '', value }) {
     }, [value]);
 
     return (<>
-        <div className="vcontainer">
+        <div className="veditor vcontainer">
 
             {/* Toolbar */}
             <Toolbar
@@ -300,7 +300,7 @@ export default function VEditor({ onChange, onChangeImage = '', value }) {
                 handleColor={(prop, val) => handleColor(editorRef, handleInput, prop, val)}
                 toggleList={(listType) => toggleList(editorRef, handleInput, listType)}
                 handleInsertLink={(e) => handleInsertLink(editorRef, handleInput)}
-                handleInsertImage={(file) => uploadAndInsertImage(editorRef, handleInput, file)}
+                handleInsertImage={(file) => uploadAndInsertImage(editorRef, handleInput, file, imageHandler)}
                 handleAlertBox={(file) => handleAlertBox(editorRef, handleInput, file)}
                 handleHorizontalLine={() => handleHorizontalLine(editorRef, handleInput)}
                 handleInsertTable={(rows, cols) => handleInsertTable(editorRef, handleInput, rows, cols)}

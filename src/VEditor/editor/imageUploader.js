@@ -1,14 +1,26 @@
 import axios from 'axios';
 
-export async function uploadAndInsertImage(editorRef, handleInput, file) {
+export async function uploadAndInsertImage(editorRef, handleInput, file, imageHandler='') {
 
     const formData = new FormData();
     formData.append('image', file);
 
     try {
-        const res = await axios.post('http://localhost:1100/api/save-veditor-image', formData);
-        if (res.data.status == 'success') {
-            insertImageAtCursor(editorRef, res.data.data.url);
+        let imageURL='';
+        let res='';
+        if(imageHandler.onImageChange){
+            res=imageHandler.onImageChange(formData);
+            imageURL=res.url;
+        }
+        else{
+            formData.append('source', imageHandler.source);
+            formData.append('upload_path', imageHandler.uploadPath);
+            formData.append('prefix', imageHandler.prefix);
+            res = await axios.post(API, formData);
+            imageURL=res.data.data.url
+        }
+        if (imageURL) {
+            insertImageAtCursor(editorRef,imageURL);
             handleInput();
         }
     } catch (error) {
